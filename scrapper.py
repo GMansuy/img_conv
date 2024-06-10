@@ -4,7 +4,8 @@ import requests
 import os
 
 def getUrlContent(url) :
-    return BeautifulSoup(requests.get(url).content, 'html.parser')
+    content = requests.get(url).content
+    return BeautifulSoup(content, 'html.parser')
 
 def getImageUrl(url, imageSet):
     htmldata = requests.get(url).text
