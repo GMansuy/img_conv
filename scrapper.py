@@ -4,11 +4,12 @@ import requests
 import os
 
 def getUrlContent(url) :
-    content = requests.get(url).content
+    rsps = requests.get(url)
+    content = rsps.content
     return BeautifulSoup(content, 'html.parser')
 
 def getImageUrl(url, imageSet):
-    htmldata = requests.get(url).text
+    htmldata = requests.get(url).content
     soup = BeautifulSoup(htmldata, 'html.parser')
     for item in soup.find_all('img') :
         imageSet.add(item['src'])
@@ -23,7 +24,7 @@ def downloadImage(imgUrl):
         imgName = imgUrl[nameIndex + 1:]
     else :
         imgName = imgUrl
-    
+
     if imgUrl.startswith('https') :
         output = os.path.curdir + '/images/' + imgName
         urllib.request.urlretrieve(imgUrl, output)

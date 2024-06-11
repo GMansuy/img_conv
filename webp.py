@@ -8,10 +8,7 @@ def link(uri, label=None):
     if label is None: 
         label = uri
     parameters = ''
-
-    # OSC 8 ; params ; URI ST <name> OSC 8 ;; ST 
     escape_mask = '\033]8;{};{}\033\\{}\033]8;;\033\\'
-
     return escape_mask.format(parameters, uri, label)
 
 
@@ -37,29 +34,40 @@ def convert_to_webp(img_name) :
 
 
 def load_images() :
-    extensions = ('.png', '.jpg', '.jpeg')
+    extensions = ('PNG', 'JPG', 'JPEG')
     try:
         list_of_images = os.listdir('./images')
         images = list()
 
         for image in list_of_images:
-            if image.endswith(extensions):
-                webp_name = convert_to_webp(image)
-                image_size = get_image_size(os.path.curdir + '/images/' + image)
-                webp_size = get_image_size(os.path.curdir + '/webp/' + webp_name)
+            try :
                 image_format = Image.open(os.path.curdir + '/images/' + image).format
-                images.append(IMG_FILE(image, image_format, image_size, webp_size, webp_name))
+                if image_format in extensions:
+                    webp_name = convert_to_webp(image)
+                    image_size = get_image_size(os.path.curdir + '/images/' + image)
+                    webp_size = get_image_size(os.path.curdir + '/webp/' + webp_name)
+                    images.append(IMG_FILE(image, image_format, image_size, webp_size, webp_name))
+            except :
+                print ('Image : ', image, 'cannot be converted !')
 
-        column_width = 35
+        column_width = 60
         print(Style.BRIGHT + '\nRecommended conversions : \n')
 
-        header = ("Image Name", "Base Format", "Base Size (KB)", "Webp Size (KB)", "Link")
-        print(f"{header[0]:<{column_width}}{header[1]:<{column_width}}{header[2]:<{column_width}}{header[3]:<{column_width}}{header[4]:<{column_width}}")
-        print('-' * (column_width * 5))
+        header = ("Image Name", "Base Size (KB)", "Webp Size (KB)", "Link")
+        print(f"{header[0]:<{column_width}}{header[1]:<{column_width}}{header[2]:<{column_width}}{header[3]:<{column_width}}")
+        print('-' * (column_width * 4))
+
+        potential_savings = 0
 
         for img in images:
             if (img.size > img.webp_size) :
-                print(f"{Fore.CYAN + img.filename:<{column_width}} {Fore.YELLOW + img.format:<{column_width}} {img.size:<{column_width}} {img.webp_size:<{column_width}} {link('file:///home/gabriel/img_conv/webp/' + img.webp_name) :<{column_width}}")
+                potential_savings += img.size - img.webp_size
+                print(f"{Fore.CYAN + img.filename:<{column_width}} \
+                {Fore.RED + str(img.size):<{column_width}} \
+                {Fore.GREEN + str(img.webp_size):<{column_width}} \
+                {Fore.YELLOW + link('file:///home/gabriel/img_conv/webp/' + img.webp_name) :<{column_width}}\n")
+
+        print(Fore.RESET + "Potential savings : ", potential_savings, 'KB\n')
         return(images)
     except:
         pass
